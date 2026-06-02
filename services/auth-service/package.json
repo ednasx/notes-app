@@ -1,0 +1,14 @@
+{
+  "name": "auth-service",
+  "version": "1.0.0",
+  "description": "Handles authentication and JWT token management",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest --watchAll --detectOpenHandles"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

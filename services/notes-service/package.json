@@ -1,0 +1,14 @@
+{
+  "name": "notes-service",
+  "version": "1.0.0",
+  "description": "Handles CRUD operations for user notes",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest --watchAll --detectOpenHandles"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
