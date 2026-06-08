@@ -75,6 +75,7 @@ export const register = async (req, res) => {
             user: newUser,
             accessToken
         })
+
     } catch (error) {
         console.error('Registration error:', error.message)
         return res.status(500).json({
@@ -133,8 +134,70 @@ export const login = async (req, res) => {
             },
             accessToken
         })
+
     } catch (error) {
         console.error('Login error:', error.message)
+        return res.status(500).json({
+            error: 'Internal server error'
+        })
+    }
+}
+
+export const refresh = async (req, res) => {
+    try {
+        const token = req.cookies.refreshToken
+
+        if (!token) {
+            return res.status(401).json({
+                error: 'Refresh token not found'
+            })
+        }
+
+        let decoded
+        try {
+            decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET)
+        } catch (err) {
+            return res.status(401).json({
+                error: 'Invalid or expired refresh token'
+            })
+        }
+
+        const storedToken = await redisClient.get(`refreshToken:${decoded.userId}`)
+
+        if (!storedToken) {
+            return res.status(401).json({
+                error: 'Refresh token not found: Please log in again'
+            })
+        }
+
+        if (storedToken !== token) {
+            return res.status(401).json({
+                error: 'Refresh token mismatch: Please log in again'
+            })
+        }
+
+        const { accessToken, refreshToken: newRefreshToken } = generateTokens(decoded.userId)
+
+        await redisClient.set(
+            `refreshToken:${decoded.userId}`,
+            newRefreshToken,
+            { EX: 7 * 24 * 60 * 60 }
+        )
+
+        res.cookie('refreshToken', newRefreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        })
+
+        return res.status(200).json({
+            message: 'Token refreshed successfully',
+            accessToken
+        })
+
+    } catch (error) {
+        console.error('Refresh error:', error.message)
         return res.status(500).json({
             error: 'Internal server error'
         })
