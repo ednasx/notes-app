@@ -3,6 +3,7 @@ import cors from 'cors'
 import helmet from 'helmet'
 import dotenv from 'dotenv'
 import pool from './config/db.js'
+import authRoutes from './routes/authRoutes.js'
 
 dotenv.config()
 
@@ -12,6 +13,8 @@ const PORT = process.env.PORT || 3001
 app.use(helmet())
 app.use(cors())
 app.use(express.json())
+
+app.use('/api/auth', authRoutes)
 
 app.get('/health', async (req, res) => {
     try {
