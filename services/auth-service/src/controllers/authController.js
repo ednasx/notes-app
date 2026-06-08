@@ -1,6 +1,17 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
+import { createClient } from 'redis'
+
+const redisClient = createClient({
+    url: process.env.REDIS_URL
+})
+
+redisClient.on('error', (err) => {
+    console.error('Redis client error:', err)
+})
+
+await redisClient.connect()
 
 const generateTokens = (userId) => {
     const accessToken = jwt.sign(
@@ -66,6 +77,64 @@ export const register = async (req, res) => {
         })
     } catch (error) {
         console.error('Registration error:', error.message)
+        return res.status(500).json({
+            error: 'Internal server error'
+        })
+    }
+}
+
+export const login = async (req, res) => {
+    try {
+        const { email, password } = req.body
+
+        if (!email || !password) {
+            return res.status(400).json({
+                error: 'Email and password are required'
+            })
+        }
+
+        const user = await User.findByEmail(email)
+        if (!user) {
+            return res.status(401).json({
+                error: 'Invalid email or password'
+            })
+        }
+
+        const passwordMatch = await bcrypt.compare(password, user.password)
+        if (!passwordMatch) {
+            return res.status(401).json({
+                error: 'Invalid email or password'
+            })
+        }
+
+        const { accessToken, refreshToken } = generateTokens(user.id)
+
+        await redisClient.set(
+            `refreshToken:${user.id}`,
+            refreshToken,
+            { EX: 7 * 24 * 60 * 60 }
+        )
+
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        })
+
+        return res.status(200).json({
+            message: 'Login successful',
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                is_verified: user.is_verified,
+                created_at: user.created_at
+            },
+            accessToken
+        })
+    } catch (error) {
+        console.error('Login error:', error.message)
         return res.status(500).json({
             error: 'Internal server error'
         })
