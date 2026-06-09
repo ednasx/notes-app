@@ -203,3 +203,36 @@ export const refresh = async (req, res) => {
         })
     }
 }
+
+export const logout = async (req, res) => {
+    try {
+        const token = req.cookies.refreshToken
+
+        if (token) {
+            let decoded
+            try {
+                decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET)
+                await redisClient.del(`refreshToken:${decoded.userId}`)
+            } catch (err) {
+                // Token is invalid or expired - nothing to delete in Redis
+                // We still clear the cookie below
+            }
+        }
+
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
+        })
+
+        return res.status(200).json({
+            message: 'Logged out successfully'
+        })
+
+    } catch (error) {
+        console.error('Logout error:', error.message)
+        return res.status(500).json({
+            error: 'Internal server error'
+        })
+    }
+}
