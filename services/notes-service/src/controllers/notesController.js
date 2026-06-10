@@ -17,13 +17,29 @@ export const createNote = async (req, res) => {
             tags
         })
 
-        return res.status(200).json({
+        return res.status(201).json({
             message: 'Note created successfully',
             note
         })
 
     } catch (error) {
         console.error('Create note error:', error.message)
+        return res.status(500).json({
+            error: 'Internal server error'
+        })
+    }
+}
+
+export const getAllNotes = async (req, res) => {
+    try {
+        const notes = await Note.find({ userId: req.userId }).sort({ createdAt: -1 })
+
+        return res.status(200).json({
+            notes
+        })
+
+    } catch (error) {
+        console.error('Get all notes error:', error.message)
         return res.status(500).json({
             error: 'Internal server error'
         })
