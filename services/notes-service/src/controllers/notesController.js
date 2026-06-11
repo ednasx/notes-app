@@ -73,3 +73,55 @@ export const getNoteById = async (req, res) => {
         })
     }
 }
+
+export const updateNote = async (req, res) => {
+    try {
+        const { title, content, tags } = req.body
+
+        if (title !== undefined && title.trim() === '') {
+            return res.status(400).json({
+                error: 'Title cannot be empty'
+            })
+        }
+
+        const updates = {}
+        if (title !== undefined) updates.title = title
+        if (content !== undefined) updates.content = content
+        if (tags !== undefined) updates.tags = tags
+
+        if (Object.keys(updates).length === 0) {
+            return res.status(400).json({
+                error: 'No fields provided to update'
+            })
+        }
+
+        const note = await Note.findOneAndUpdate(
+            { _id: req.params.id, userId: req.userId },
+            updates,
+            { new: true, runValidators: true }
+        )
+
+        if (!note) {
+            return res.status(404).json({
+                error: 'Note not found'
+            })
+        }
+
+        return res.status(200).json({
+            message: 'Note updated successfully',
+            note
+        })
+
+    } catch (error) {
+        if (error.name === 'CastError') {
+            return res.status(400).json({
+                error: 'Invalid note ID format'
+            })
+        }
+
+        console.error('Update note error:', error.message)
+        return res.status(500).json({
+            error: 'Internal server error'
+        })
+    }
+}
