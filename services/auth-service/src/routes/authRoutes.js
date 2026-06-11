@@ -8,6 +8,6 @@ router.post('/register', register)
 router.post('/login', login)
 router.post('/refresh', refresh)
 router.post('/logout', logout)
-router.post('/me', authenticate, me)
+router.get('/me', authenticate, me)
 
 export default router
