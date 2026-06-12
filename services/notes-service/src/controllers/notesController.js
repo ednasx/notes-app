@@ -125,3 +125,31 @@ export const updateNote = async (req, res) => {
         })
     }
 }
+
+export const deleteNote = async (req, res) => {
+    try {
+        const note = await Note.findOneAndDelete({ _id: req.params.id, userId: req.userId })
+
+        if (!note) {
+            return res.status(404).json({
+                error: 'Note not found'
+            })
+        }
+
+        return res.status(200).json({
+            message: 'Note deleted successfully'
+        })
+
+    } catch (error) {
+        if (error.name === 'CastError') {
+            return res.status(400).json({
+                error: 'Invalid note ID format'
+            })
+        }
+
+        console.error('Delete note error:', error.message)
+        return res.status(500).json({
+            error: 'Internal server error'
+        })
+    }
+}
