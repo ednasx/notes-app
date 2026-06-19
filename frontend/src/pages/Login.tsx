@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { useAuth } from "@/hooks/useAuth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -15,9 +16,25 @@ import {
 function Login() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
+    const [error, setError] = useState("")
+    const [loading, setLoading] = useState(false)
 
-    function handleSubmit() {
-        console.log("Login attempt:", { email, password })
+    const { login } = useAuth()
+    const navigate = useNavigate()
+
+    async function handleSubmit() {
+        setError("")
+        setLoading(true)
+
+        try {
+            await login(email, password)
+            navigate("/notes")
+        } catch (err) {
+            const message = err instanceof Error ? err.message : "Login failed."
+            setError(message)
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -51,11 +68,13 @@ function Login() {
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
+
+                    {error && <p className="text-sm text-destructive">{error}</p>}
                 </CardContent>
 
                 <CardFooter className="flex flex-col gap-4">
-                    <Button className="w-full" onClick={handleSubmit}>
-                        Login
+                    <Button className="w-full" onClick={handleSubmit} disabled={loading}>
+                        {loading ? "Logging in..." : "Login"}
                     </Button>
                     <p className="text-sm text-muted-foreground">
                         Don't have an account?{" "}
