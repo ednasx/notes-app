@@ -1,13 +1,22 @@
-import './App.css'
-import { Button } from "@/components/ui/button"
+import { Routes, Route, Navigate } from "react-router-dom"
+import { useAuth } from "@/hooks/useAuth"
+import Spinner from "@/components/Spinner"
+import Login from "@/pages/Login"
+import Register from "@/pages/Register"
 
 function App() {
+  const { isLoading } = useAuth()
+
+  if (isLoading) {
+    return <Spinner />
+  }
+
   return (
-    <div className="min-h-svh flex flex-col items-center justify-center bg-slate-900 text-slate-100">
-      <h1 className="text-4xl font-bold text-emerald-400">Notes App</h1>
-      <p className="mt-2 text-slate-400">Frontend is running.</p>
-      <Button>Click Me</Button>
-    </div>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/Register" element={<Register />} />``
+      <Route path="/" element={<Navigate to="/login" replace />} />
+    </Routes>
   )
 }
 
