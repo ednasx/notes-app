@@ -3,6 +3,8 @@ import { useAuth } from "@/hooks/useAuth"
 import Spinner from "@/components/Spinner"
 import Login from "@/pages/Login"
 import Register from "@/pages/Register"
+import Notes from "@/pages/Notes"
+import { ProtectedRoute } from "./components/ProtectedRoute"
 
 function App() {
   const { isLoading } = useAuth()
@@ -14,7 +16,14 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route path="/Register" element={<Register />} />``
+      <Route path="/register" element={<Register />} />
+      <Route
+        path="/notes"
+        element={
+          <ProtectedRoute>
+            <Notes />
+          </ProtectedRoute>
+        } />
       <Route path="/" element={<Navigate to="/login" replace />} />
     </Routes>
   )
