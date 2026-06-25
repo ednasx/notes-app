@@ -13,6 +13,7 @@ export interface Note {
 interface NotePayload {
     title: string
     content: string
+    tags: string[]
 }
 
 // Shared internal helper: handles method, auth header, optional body, and errors

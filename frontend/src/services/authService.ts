@@ -40,17 +40,33 @@ export function registerRequest(credentials: RegisterCredentials) {
     return request("/api/auth/register", credentials)
 }
 
-export async function refreshRequest() {
-    const response = await fetch("/api/auth/refresh", {
-        method: "POST",
-        credentials: "include"
-    })
+// Module-level lock: holds the in-flight refresh promise (or null when idle)
+// Lives outside any component, so BOTH StrictMode effect runs share it
+let refreshPromise: Promise<{ accessToken: string }> | null = null
 
-    if (!response.ok) {
-        throw new Error("Session expired")
+export function refreshRequest(): Promise<{ accessToken: string }> {
+    if (refreshPromise) {
+        return refreshPromise
     }
 
-    return response.json()
+    refreshPromise = (async () => {
+        try {
+            const response = await fetch("/api/auth/refresh", {
+                method: "POST",
+                credentials: "include",
+            })
+
+            if (!response.ok) {
+                throw new Error("Session expired")
+            }
+
+            return response.json()
+        } finally {
+            refreshPromise = null
+        }
+    })()
+
+    return refreshPromise
 }
 
 export async function meRequest(accessToken: string) {

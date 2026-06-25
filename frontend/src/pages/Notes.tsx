@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "@/hooks/useAuth"
 import { getNotesRequest, type Note } from "@/services/noteService"
 import Spinner from "@/components/Spinner"
+import { CreateNoteDialog } from "@/components/CreateNoteDialog"
 
 function Notes() {
     const { accessToken } = useAuth()
@@ -40,6 +41,11 @@ function Notes() {
         }
     }, [accessToken])
 
+    function handleNoteCreated(newNote: Note) {
+        // Prepend: list is sorted newest-first, so a new note goes on top
+        setNotes((prev) => [newNote, ...prev])
+    }
+
     if (isLoading) {
         return <Spinner />
     }
@@ -54,7 +60,10 @@ function Notes() {
 
     return (
         <div className="mx-auto max-w-2xl p-6">
-            <h1 className="mb-6 text-2xl font-bold">My Notes</h1>
+            <div className="mb-6 flex items-center justify-between">
+                <h1 className="text-2xl font-bold">My Notes</h1>
+                <CreateNoteDialog onNoteCreated={handleNoteCreated} />
+            </div>
 
             {notes.length === 0 ? (
                 <p className="text-muted-foreground">You don't have any notes yet.</p>
