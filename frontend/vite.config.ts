@@ -13,8 +13,12 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/api": {
+      "/api/auth": {
         target: "http://localhost:3001",
+        changeOrigin: true,
+      },
+      "/api/notes": {
+        target: "http://localhost:3002",
         changeOrigin: true,
       },
     },
