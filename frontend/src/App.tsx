@@ -4,7 +4,8 @@ import Spinner from "@/components/Spinner"
 import Login from "@/pages/Login"
 import Register from "@/pages/Register"
 import Notes from "@/pages/Notes"
-import { ProtectedRoute } from "./components/ProtectedRoute"
+import { ProtectedRoute } from "@/components/ProtectedRoute"
+import { Toaster } from "@/components/ui/sonner"
 
 function App() {
   const { isLoading } = useAuth()
@@ -14,18 +15,21 @@ function App() {
   }
 
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route
-        path="/notes"
-        element={
-          <ProtectedRoute>
-            <Notes />
-          </ProtectedRoute>
-        } />
-      <Route path="/" element={<Navigate to="/login" replace />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/notes"
+          element={
+            <ProtectedRoute>
+              <Notes />
+            </ProtectedRoute>
+          } />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+      </Routes>
+      <Toaster />
+    </>
   )
 }
 

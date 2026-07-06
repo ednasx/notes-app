@@ -25,7 +25,7 @@ async function request(path: string, body: unknown) {
     if (!response.ok) {
         // Try to read the backend's error message; fall back to a generic one
         const errorData = await response.json().catch(() => null)
-        const message = errorData?.message || "Something went wrong. Please try again."
+        const message = errorData?.error ?? errorData?.message ?? "Something went wrong. Please try again."
         throw new Error(message)
     }
 

@@ -37,7 +37,7 @@ async function request(
     // fetch does NOT throw on 4xx/5xx - we must check ourselves
     if (!response.ok) {
         const errorData = await response.json().catch(() => null)
-        const message = errorData?.message || "Something went wrong. Please try again."
+        const message = errorData?.error ?? errorData?.message ?? "Something went wrong. Please try again."
         throw new Error(message)
     }
 
