@@ -101,24 +101,25 @@ function Notes() {
 
     // Commit a pending delete: actually call the backend, then drop it from pending 
     function commitDelete(noteId: string) {
-        setPendingDeletes((prev) => {
-            const pending = prev[noteId]
-            if (!pending) return prev // already handled (undone or committed)
+        const pending = pendingDeletesRef.current[noteId]
+        if (!pending) return // already handled (undone or committed)
 
-            if (accessToken) {
-                deleteNoteRequest(accessToken, noteId).catch(() => {
-                    // Backend delete failed - restore the note so we don't lose it 
-                    setNotes((current) => [pending.note, ...current])
-                    toast.error("Failed to delete note. It has been restored.")
-                })
-            }
+        if (accessToken) {
+            deleteNoteRequest(accessToken, noteId).catch(() => {
+                // Backend delete failed - restore the note (guarded against duplicates)
+                setNotes((current) =>
+                    current.some((n) => n._id === pending.note._id)
+                        ? current
+                        : [pending.note, ...current]
+                )
+                toast.error("Failed to delete note. It has been restored")
+            })
+        }
 
-            // Remove this entry from pending (immutably, without the committed id)
-            const rest = Object.fromEntries(
-                Object.entries(prev).filter(([id]) => id !== noteId)
-            )
-            return rest
-        })
+        // Remove from pending (pure updater)
+        setPendingDeletes((prev) =>
+            Object.fromEntries(Object.entries(prev).filter(([id]) => id !== noteId))
+        )
     }
 
     // Start a delete: optimistically remove from the list, show undo toast, arm timer 
@@ -149,21 +150,26 @@ function Notes() {
 
     // Undo a pending delete: cancel the timer, restore the note, no backend call
     function handleUndoDelete(noteId: string) {
+        // Read the pending entry OUTSIDE any updater, using the ref for freshest value
+        const pending = pendingDeletesRef.current[noteId]
+        if (!pending) return // timer already fired - too late to undo
+
+        clearTimeout(pending.timerId) // stop the scheduled backend delete
+
+        // Restore the note - guarded so a double-invoke cannot duplicate it
+        setNotes((current) =>
+            current.some((n) => n._id === pending.note._id)
+                ? current // already present, don't add again
+                : [pending.note, ...current]
+        )
+
+        // Remove from pending (pure updater - only computes next state)
         setPendingDeletes((prev) => {
-            const pending = prev[noteId]
-            if (!pending) return prev // timer already fired - too late to undo 
-
-            clearTimeout(pending.timerId) // stop the pending backend call
-
-            // Restore the note to the list 
-            setNotes((current) => [pending.note, ...current])
-
-            // Drop it from pending 
-            const rest = Object.fromEntries(
+            return Object.fromEntries(
                 Object.entries(prev).filter(([id]) => id !== noteId)
             )
-            return rest
         })
+
     }
 
     // When the dialog finishes closing, clear the editing target
