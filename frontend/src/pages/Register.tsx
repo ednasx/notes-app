@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { useAuth } from "@/hooks/useAuth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,12 +14,22 @@ import {
 } from "@/components/ui/card"
 
 function Register() {
+    const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
     const [error, setError] = useState("")
+    const [loading, setLoading] = useState(false)
 
-    function handleSubmit() {
+    const { register } = useAuth()
+    const navigate = useNavigate()
+
+    async function handleSubmit() {
+        if (name.trim() === "") {
+            setError("Name is required")
+            return
+        }
+
         if (password !== confirmPassword) {
             setError("Passwords do not match.")
             return
@@ -30,8 +41,17 @@ function Register() {
         }
 
         setError("")
+        setLoading(true)
 
-        console.log("Register attempt:", { email, password })
+        try {
+            await register(name.trim(), email, password)
+            navigate("/notes")
+        } catch (err) {
+            const message = err instanceof Error ? err.message : "Registration failed."
+            setError(message)
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -45,6 +65,17 @@ function Register() {
                 </CardHeader>
 
                 <CardContent className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="name">Name</Label>
+                        <Input
+                            id="name"
+                            type="text"
+                            placeholder="Jane Doe"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                    </div>
+                    
                     <div className="flex flex-col gap-2">
                         <Label htmlFor="email">Email</Label>
                         <Input
@@ -80,8 +111,8 @@ function Register() {
                 </CardContent>
 
                 <CardFooter className="flex flex-col gap-4">
-                    <Button className="w-full" onClick={handleSubmit}>
-                        Register
+                    <Button className="w-full" onClick={handleSubmit} disabled={loading}>
+                        {loading ? "Creating account" : "Register"}
                     </Button>
                     <p className="text-sm text-muted-foreground">
                         Already have an account?{" "}
