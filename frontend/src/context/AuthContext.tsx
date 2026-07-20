@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, type ReactNode } from "react"
-import { loginRequest, registerRequest, refreshRequest, meRequest } from "@/services/authService"
+import { loginRequest, registerRequest, refreshRequest, meRequest, logoutRequest } from "@/services/authService"
 
 // The shape of the user object my backend returns
 interface User {
@@ -18,7 +18,7 @@ interface AuthContextType {
     isLoading: boolean
     login: (email: string, password: string) => Promise<void>
     register: (name: string, email: string, password: string) => Promise<void>
-    logout: () => void
+    logout: () => Promise<void>
 }
 
 
@@ -75,9 +75,18 @@ function AuthProvider({ children }: { children: ReactNode }) {
         setAccessToken(data.accessToken)
     }
 
-    function logout() {
-        setUser(null)
-        setAccessToken(null)
+    async function logout() {
+        try {
+            await logoutRequest()
+        } catch {
+            // Intentionally ignored. The server call is BEST-EFFORT; the local
+            // clear below is GUARANTEED. If the backend is unreachable we still
+            // log the user out locally rather than trapping them in a session 
+            // they explicitly asked to end. Do not delete this empty catch. 
+        } finally {
+            setUser(null)
+            setAccessToken(null)
+        }
     }
 
     return (

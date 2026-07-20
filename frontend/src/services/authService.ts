@@ -69,6 +69,19 @@ export function refreshRequest(): Promise<{ accessToken: string }> {
     return refreshPromise
 }
 
+export async function logoutRequest() {
+    const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+    })
+
+    if (!response.ok) {
+        throw new Error("Logout Failed")
+    }
+
+    return response.json()
+}
+
 export async function meRequest(accessToken: string) {
     const response = await fetch("/api/auth/me", {
         method: "GET",

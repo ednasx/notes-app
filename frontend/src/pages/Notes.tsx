@@ -5,7 +5,7 @@ import Spinner from "@/components/Spinner"
 import { CreateNoteDialog } from "@/components/CreateNoteDialog"
 import { EditNoteDialog } from "@/components/EditNoteDialog"
 import { Button } from "@/components/ui/button"
-import { Pencil, Trash2 } from "lucide-react"
+import { Pencil, Trash2, LogOut} from "lucide-react"
 import { toast } from "sonner"
 
 function Notes() {
@@ -15,7 +15,7 @@ function Notes() {
         timerId: ReturnType<typeof setTimeout>
     }
 
-    const { accessToken } = useAuth()
+    const { accessToken, logout } = useAuth()
 
     const [notes, setNotes] = useState<Note[]>([])
     const [isLoading, setIsLoading] = useState(true)
@@ -196,7 +196,17 @@ function Notes() {
         <div className="mx-auto max-w-2xl p-6">
             <div className="mb-6 flex items-center justify-between">
                 <h1 className="text-2xl font-bold">My Notes</h1>
-                <CreateNoteDialog onNoteCreated={handleNoteCreated} />
+                <div className="flex items-center gap-2">
+                    <CreateNoteDialog onNoteCreated={handleNoteCreated} />
+                    <Button 
+                        variant="ghost"
+                        size="icon"
+                        onClick={logout}
+                        aria-label="Log out"
+                    >
+                        <LogOut className="h-4 w-4" />
+                    </Button>
+                </div>
             </div>
 
             {notes.length === 0 ? (
