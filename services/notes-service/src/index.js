@@ -12,6 +12,8 @@ await connectDB()
 const app = express()
 const PORT = process.env.PORT || 3002
 
+app.set('trust proxy', 'loopback')
+
 app.use(helmet())
 app.use(cors())
 app.use(express.json())
