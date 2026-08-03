@@ -1,0 +1,21 @@
+# Host-built dependencies — npm ci rebuilds these correctly inside the image
+node_modules
+
+# Secrets — MUST be injected at runtime, never baked into the image
+.env
+.env.*
+
+# Version control history — irrelevant to the running app, can be large
+.git
+.gitignore
+
+# Docker's own files — no reason to copy them into the image
+Dockerfile
+.dockerignore
+
+# Editor / OS noise
+.vscode
+.DS_Store
+
+# Test + coverage artifacts not needed at runtime
+coverage
