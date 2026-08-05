@@ -1,0 +1,31 @@
+# Root .dockerignore - applies to builds using the project root as context (frontend)
+
+# All node_modules anywhere in the tree
+**/node_modules
+
+# Build outputs (the image rebuilds dist/ itself in stage 1)
+**/dist
+**/build
+.vite
+
+# Secrets - never into any image
+.env
+.env.*
+!.env.example
+
+# Version control + docker files
+.git
+.gitignore
+**/Dockerfile
+**/.dockerignore
+
+# Editor / OS noise
+.vscode
+.DS_Store
+Thumbs.db
+
+# Tests / coverage
+**/coverage
+
+# The other services' source - the frontend build does not need them
+services

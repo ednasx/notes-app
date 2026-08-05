@@ -11,7 +11,13 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 3001
 
-app.set('trust proxy', 'loopback')
+// Parse TRUST_PROXY: numeric strings -> number (hop count),
+// everything else -> string (e.g. 'loopback', 'uniquelocal', a subnet)
+const trustProxyEnv = process.env.TRUST_PROXY
+if (trustProxyEnv !== undefined) {
+    const asNumber = Number(trustProxyEnv)
+    app.set('trust proxy', Number.isInteger(asNumber) ? asNumber : trustProxyEnv)
+}
 
 app.use(helmet())
 app.use(cors())
@@ -19,6 +25,14 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.use('/api/auth', authRoutes)
+
+// app.get('/api/auth/_debug/ip', (req, res) => {
+//     res.json({
+//         'req.ip': req.ip,
+//         'trust proxy setting': req.app.get('trust proxy'),
+//         'x-forwarded-for': req.headers['x-forwarded-for']
+//     })
+// })
 
 app.get('/health', async (req, res) => {
     try {

@@ -12,7 +12,13 @@ await connectDB()
 const app = express()
 const PORT = process.env.PORT || 3002
 
-app.set('trust proxy', 'loopback')
+// Parse TRUST_PROXY: numeric strings -> number (hop count),
+// everything else -> string (e.g. 'loopback', 'uniquelocal', a subnet)
+const trustProxyEnv = process.env.TRUST_PROXY
+if (trustProxyEnv !== undefined) {
+    const asNumber = Number(trustProxyEnv)
+    app.set('trust proxy', Number.isInteger(asNumber) ? asNumber : trustProxyEnv)
+}
 
 app.use(helmet())
 app.use(cors())
