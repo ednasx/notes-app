@@ -58,6 +58,7 @@ services:
 
   auth-service:
     build: ./services/auth-service
+    init: true
     environment:
       NODE_ENV: development
       PORT: 3001
@@ -82,6 +83,7 @@ services:
 
   notes-service:
     build: ./services/notes-service
+    init: true
     environment:
       NODE_ENV: development
       PORT: 3002
