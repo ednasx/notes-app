@@ -1,0 +1,122 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: authuser
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: authdb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U authuser -d authdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - notes-net
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - notes-net
+  
+  mongo:
+    image: mongo:8
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - notes-net
+  
+  auth-migrate:
+    build: ./services/auth-service
+    command: npm run migrate
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://authuser:${POSTGRES_PASSWORD}@postgres:5432/authdb
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - notes-net
+
+  auth-service:
+    build: ./services/auth-service
+    init: true
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgresql://authuser:${POSTGRES_PASSWORD}@postgres:5432/authdb
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      TRUST_PROXY: 172.20.0.0/16
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      auth-migrate:
+        condition: service_completed_successfully
+    ports:
+      - "3001:3001"
+    networks:
+      - notes-net
+
+  notes-service:
+    build: ./services/notes-service
+    init: true
+    environment:
+      NODE_ENV: development
+      PORT: 3002
+      MONGODB_URI: mongodb://mongo:27017/notesdb
+      JWT_SECRET: ${JWT_SECRET}
+      TRUST_PROXY: 172.20.0.0/16
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - "3002:3002"
+    networks:
+      - notes-net
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - auth-service
+      - notes-service
+    networks:
+      - notes-net
+
+volumes:
+  postgres-data:
+  mongo-data:
+
+networks:
+  notes-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

@@ -1,0 +1,18 @@
+# Dev-only layer, auto-merged on top of docker-compose.yml by `docker compose up`.
+# Adds live source bind-mounts + nodemon for a fast edit-reload loop.
+# Production/CI runs `docker compose -f docker-compose.yml up` to SKIP this.
+
+
+services:
+  auth-service:
+    command: npm run dev
+    volumes:
+      - ./services/auth-service:/app
+      - /app/node_modules
+
+  
+  notes-service:
+    command: npm run dev
+    volumes:
+      - ./services/notes-service:/app
+      - /app/node_modules

@@ -1,17 +1,7 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
-import { createClient } from 'redis'
-
-const redisClient = createClient({
-    url: process.env.REDIS_URL
-})
-
-redisClient.on('error', (err) => {
-    console.error('Redis client error:', err)
-})
-
-await redisClient.connect()
+import redisClient from '../config/redis.js'
 
 const generateTokens = (userId) => {
     const accessToken = jwt.sign(
