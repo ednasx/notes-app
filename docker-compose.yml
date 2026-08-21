@@ -69,6 +69,12 @@ services:
       JWT_EXPIRES_IN: 15m
       JWT_REFRESH_EXPIRES_IN: 7d
       TRUST_PROXY: 172.20.0.0/16
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3001/health').then(r => process.exit(r.ok ? 0: 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     depends_on:
       postgres:
         condition: service_healthy
@@ -90,6 +96,12 @@ services:
       MONGODB_URI: mongodb://mongo:27017/notesdb
       JWT_SECRET: ${JWT_SECRET}
       TRUST_PROXY: 172.20.0.0/16
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3002/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     depends_on:
       mongo:
         condition: service_healthy
@@ -105,8 +117,10 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - auth-service
-      - notes-service
+      auth-service:
+        condition: service_healthy
+      notes-service:
+        condition: service_healthy
     networks:
       - notes-net
 
