@@ -1,6 +1,5 @@
-import pg, { DatabaseError } from 'pg'
+import pg from 'pg'
 import dotenv from 'dotenv'
-import { text } from 'express'
 
 dotenv.config()
 
