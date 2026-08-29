@@ -8,6 +8,13 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    
+    env:
+      DATABASE_URL: postgresql://authuser:testpassword@localhost:5432/authdb_test
+      JWT_SECRET: test-access-secret-for-ci
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_SECRET: test-refresh-secret-for-ci
+      JWT_REFRESH_EXPIRES_IN: 7d
 
     services:
       postgres:
@@ -50,11 +57,7 @@ jobs:
       - name: Run database migrations 
         run: node src/database/migrate.js
         working-directory: services/auth-service
-        env: 
-          DATABASE_URL: postgresql://authuser:testpassword@localhost:5432/authdb_test
         
       - name: Run tests
         run: npm run test:ci
         working-directory: services/auth-service
-        env: 
-          DATABASE_URL: postgresql://authuser:testpassword@localhost:5432/authdb_test
