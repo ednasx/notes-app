@@ -6,7 +6,7 @@ on:
         - main
 
 jobs:
-  test:
+  auth:
     runs-on: ubuntu-latest
     
     env:
@@ -61,3 +61,41 @@ jobs:
       - name: Run tests
         run: npm run test:ci
         working-directory: services/auth-service
+  
+  
+  notes:
+    runs-on: ubuntu-latest
+
+    env:
+      MONGODB_URI: mongodb://localhost:27017/notesdb_test
+      JWT_SECRET: test-access-secret-for-ci
+
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+        
+      - name: Install dependencies
+        run: npm install
+        working-directory: services/notes-service
+      
+      - name: Run tests
+        run: npm run test:ci
+        working-directory: services/notes-service
+      
+      
