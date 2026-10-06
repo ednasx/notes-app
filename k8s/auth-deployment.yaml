@@ -18,7 +18,13 @@ spec:
         - name: ghcr-pull-secret
       containers:
         - name: auth-service
-          image: ghcr.io/ednasx/auth-service:latest
+          image: ghcr.io/ednasx/auth-service:d9400bf894026926d44e19fe0f1ade8af16cfe68
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3001
+          envFrom:
+            - configMapRef:
+                name: auth-config
+            - secretRef:
+                name: auth-secret
             
