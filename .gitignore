@@ -30,3 +30,6 @@ Thumbs.db
 
 # Coverage reports
 coverage/
+
+# Kubernetes Secrets File
+*-secret.env

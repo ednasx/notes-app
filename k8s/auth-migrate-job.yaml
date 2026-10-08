@@ -1,30 +1,28 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: auth-service
+  name: auth-migrate
   labels:
     app: auth-service
+    component: migration
 spec:
-  replicas: 1
-  selector: 
-    matchLabels:
-      app: auth-service
+  backoffLimit: 3
   template:
     metadata:
       labels:
-        app: auth-service
+        app: auth-migrate
+        component: migration
     spec:
+      restartPolicy: Never
       imagePullSecrets:
         - name: ghcr-pull-secret
       containers:
-        - name: auth-service
+        - name: auth-migrate
           image: ghcr.io/ednasx/auth-service:d9400bf894026926d44e19fe0f1ade8af16cfe68
           imagePullPolicy: IfNotPresent
-          ports:
-            - containerPort: 3001
+          command: ["node", "src/database/migrate.js"]
           envFrom:
             - configMapRef:
                 name: auth-config
             - secretRef:
                 name: auth-secret
-            
