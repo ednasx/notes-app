@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: 
+  name: notes-config
+  labels:
+    app: notes-service
+data:
+  PORT: "3002"
