@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notes-service
+  labels:
+    app: notes-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notes-service
+  template:
+    metadata:
+      labels:
+        app: notes-service
+    spec:
+      imagePullSecrets: 
+        - name: ghcr-pull-secret
+      containers:
+        - name: notes-service
+          image: ghcr.io/ednasx/notes-service:6742c3152ba933295187ffb35881dc105130c90e
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3002
+          envFrom:
+            - configMapRef:
+                name: notes-config
+            - secretRef:
+                name: notes-secret
