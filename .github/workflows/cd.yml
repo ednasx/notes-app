@@ -18,11 +18,21 @@ jobs:
 
     permissions:
       contents: read
-      packages: write  # Having write access to the packages allow CD to push the secret (Github token) into the GHCR (GitHub Container Registry)
+      packages: write  # Lets the built-in GITHUB_TOKEN push images to GHCR
     
     strategy:
-      matrix: 
-        service: [auth-service, notes-service]
+      fail-fast: false  # One image failing must not cancel the other builds
+      matrix:
+        include: 
+          - service: auth-service
+            context: ./services/auth-service
+            dockerfile: ./services/auth-service/Dockerfile
+          - service: notes-service
+            context: ./services/notes-service
+            dockerfile: ./services/notes-service/Dockerfile
+          - service: frontend
+            context: .    # Repo root: the Dockerfile copies from frontend/ AND gateway/
+            dockerfile: ./frontend/Dockerfile
     
     steps:
       - name: Check out the exact commit CI tested
@@ -46,7 +56,8 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
-          context: ./services/${{ matrix.service }}
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
           platforms: linux/amd64,linux/arm64  # Build BOTH; publishes a manifest list under one tag
           push: true    # So that docker can push the built image into GHCR (GitHub Container Registry)
           tags: |
