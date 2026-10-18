@@ -8,10 +8,14 @@
 **/build
 .vite
 
-# Secrets - never into any image
-.env
-.env.*
-!.env.example
+# Secrets - never into any build, at any depth
+**/.env
+**/.env.*
+!**/.env.example
+**/*-secret.env
+
+# Kubernetes manifests - the frontend build does not need them
+k8s
 
 # Version control + docker files
 .git
