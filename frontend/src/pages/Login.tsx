@@ -38,51 +38,63 @@ function Login() {
     }
 
     return (
-        <div className="min-h-svh flex items-center justify-center p-4">
+        <div className="flex flex-1 items-center justify-center px-4 pb-16 pt-6">
             <Card className="w-full max-w-sm">
                 <CardHeader>
-                    <CardTitle>Login</CardTitle>
+                    <CardTitle className="text-2xl font-extrabold tracking-tight">Welcome back</CardTitle>
                     <CardDescription>
-                        Enter your credentials to access your notes.
+                        Log in to open your folders and notes.
                     </CardDescription>
                 </CardHeader>
 
-                <CardContent className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            placeholder="you@example.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
-                    </div>
+                <form 
+                    onSubmit={(e) => {
+                        e.preventDefault()
+                        handleSubmit()
+                    }} 
+                    className="flex flex-col gap-6"
+                >
+                    <CardContent className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                autoComplete="email"
+                                placeholder="you@example.com"
+                                className="h-11 rounded-xl"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                        </div>
 
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor="password">Password</Label>
-                        <Input
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                    </div>
+                        <div className="flex flex-col gap-2">
+                            <Label htmlFor="password">Password</Label>
+                            <Input
+                                id="password"
+                                type="password"
+                                autoComplete="current-password"
+                                className="h-11 rounded-xl"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        </div>
 
-                    {error && <p className="text-sm text-destructive">{error}</p>}
-                </CardContent>
+                        {error && <p className="text-sm text-destructive">{error}</p>}
+                    </CardContent>
 
-                <CardFooter className="flex flex-col gap-4">
-                    <Button className="w-full" onClick={handleSubmit} disabled={loading}>
-                        {loading ? "Logging in..." : "Login"}
-                    </Button>
-                    <p className="text-sm text-muted-foreground">
-                        Don't have an account?{" "}
-                        <Link to="/register" className="underline">
-                            Register
-                        </Link>
-                    </p>
-                </CardFooter>
+                    <CardFooter className="flex flex-col gap-4">
+                        <Button type="submit" className="h-11 w-full rounded-xl text-base" disabled={loading}>
+                            {loading ? "Logging in..." : "Login"}
+                        </Button>
+                        <p className="text-sm text-muted-foreground">
+                            Don't have an account?{" "}
+                            <Link to="/register" className="font-semibold text-primary underline-offset-4 hover:underline">
+                                Register
+                            </Link>
+                        </p>
+                    </CardFooter>
+                </form>
             </Card>
         </div>
     )
