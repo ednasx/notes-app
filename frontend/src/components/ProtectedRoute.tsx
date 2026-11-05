@@ -17,7 +17,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
     // State 3: logged out -> bounce to login
     if (!user) {
-        return <Navigate to="/login" replace />
+        return <Navigate to="/" replace />
     }
 
     // State 2: logged in -> let them through
