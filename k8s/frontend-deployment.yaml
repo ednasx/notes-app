@@ -18,7 +18,7 @@ spec:
         - name: ghcr-pull-secret
       containers:
         - name: frontend
-          image: ghcr.io/ednasx/frontend:bd563a2c135f10f3a2e2ff0ecbe5d14067b1dcc1
+          image: ghcr.io/ednasx/frontend:c2df36dd86bc69b99204ada1caed1f0c7c91a3c5
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
