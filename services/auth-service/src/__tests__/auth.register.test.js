@@ -34,7 +34,7 @@ describe('POST /api/auth/register', () => {
         const newUser = {
             name: 'Test User',
             email: 'test.user@example.com', 
-            password: 'supersecret123'
+            password: 'Supersecret123!'
         }
 
         const response = await request(app)
@@ -66,5 +66,37 @@ describe('POST /api/auth/register', () => {
         
         expect(response.status).toBe(400)
         expect(response.body.error).toBe('Name, email and password are required')
+    })
+
+    // Password rules: must match the frontend's live checklist in Register.tsx.
+    it.each([
+        ['Short1!', 'Password must be at least 8 characters'],
+        ['nouppercase1!', 'Password must contain at least one uppercase letter'],
+        ['NoSymbol123', 'Password must contain at least one symbol'],
+        ['Has Space123', 'Password must contain at least one symbol']   // a space is not a symbol
+    ])('rejects the weak password "%s" with 400', async (password, expectedError) => {
+        const response = await request(app)
+            .post('/api/auth/register')
+            .send({
+                name: 'Weak password',
+                email: 'weak@example.com',
+                password
+            })
+        
+        expect(response.status).toBe(400)
+        expect(response.body.error).toBe(expectedError)
+    })
+
+    it('rejects a password that is not a string with 400', async () => {
+        const response = await request(app)
+            .post('/api/auth/register')
+            .send({
+                name: 'Number Password',
+                email: 'number@example.com',
+                password: 12345678
+            })
+        
+        expect(response.status).toBe(400)
+        expect(response.body.error).toBe('Password must be a string')
     })
 })

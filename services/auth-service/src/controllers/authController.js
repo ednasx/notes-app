@@ -3,6 +3,13 @@ import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
 import redisClient from '../config/redis.js'
 
+// Password rules for register 
+const passwordRules = [
+    {test: (pw) => pw.length >= 8, error: 'Password must be at least 8 characters'},
+    {test: (pw) => /[A-Z]/.test(pw), error: 'Password must contain at least one uppercase letter'},
+    {test: (pw) => /[^A-Za-z0-9\s]/.test(pw), error: "Password must contain at least one symbol"}
+]
+
 const generateTokens = (userId) => {
     const accessToken = jwt.sign(
         { userId },
@@ -29,9 +36,16 @@ export const register = async (req, res) => {
             })
         }
 
-        if (password.length < 8) {
+        if (typeof password !== 'string') {
             return res.status(400).json({
-                error: 'Password must be at least 8 characters'
+                error: 'Password must be a string'
+            })
+        }
+
+        const failedRule = passwordRules.find((rule) => !rule.test(password))
+        if (failedRule) {
+            return res.status(400).json({
+                error: failedRule.error
             })
         }
 
