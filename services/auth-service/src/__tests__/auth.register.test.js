@@ -99,4 +99,29 @@ describe('POST /api/auth/register', () => {
         expect(response.status).toBe(400)
         expect(response.body.error).toBe('Password must be a string')
     })
+
+    it('stores the refresh token so /refresh works right after register', async () => {
+        const registerResponse = await request(app)
+            .post('/api/auth/register')
+            .send({ 
+                name: 'Session User', 
+                email: 'session.user@example.com', 
+                password: 'Supersecret123!' 
+            })
+
+        expect(registerResponse.status).toBe(201)
+
+        const cookies = registerResponse.headers['set-cookie']
+        expect(cookies).toBeDefined()
+
+        const refreshResponse = await request(app)
+            .post('/api/auth/refresh')
+            .set('Cookie', cookies)
+        
+        // Remove the Redis key this test created (the DB is cleaned by afterEach; Redis is not).
+        await redisClient.del(`refreshToken:${registerResponse.body.user.id}`)
+
+        expect(refreshResponse.status).toBe(200)
+        expect(refreshResponse.body).toHaveProperty('accessToken')
+    })
 })

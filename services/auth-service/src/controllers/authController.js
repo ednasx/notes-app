@@ -74,6 +74,12 @@ export const register = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
 
+        await redisClient.set(
+            `refreshToken:${newUser.id}`,
+            refreshToken,
+            { EX: 7 * 24 * 60 * 60 }
+        )
+
         return res.status(201).json({
             message: 'Account created successfully',
             user: newUser,
