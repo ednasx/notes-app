@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { Plus } from "lucide-react"
 
 interface CreateNoteDialogProps {
     onNoteCreated: (note: Note) => void
@@ -97,7 +98,10 @@ export function CreateNoteDialog({ onNoteCreated }: CreateNoteDialogProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>Add Note</Button>
+                <Button className="h-11 rounded-x1 px-4">
+                    <Plus aria-hidden="true" />
+                    New note      
+                </Button>
             </DialogTrigger>
 
             <DialogContent>

@@ -4,7 +4,7 @@ import { ThemeToggle } from "@/components/ThemeToggle"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-function LogoMark() {
+export function LogoMark() {
     return (
         <span aria-hidden="true" className="relative inline-block h-[22px] w-[26px]">
             <span className="absolute left-0 top-0 h-1.5 w-3 rounded-t-[3px] bg-primary" />
